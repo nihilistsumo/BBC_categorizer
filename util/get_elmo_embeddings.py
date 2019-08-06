@@ -34,7 +34,11 @@ def get_elmo_embeddings(docid):
     sentences = preproc_doctext_dict[docid]
     elmo = ElmoEmbedder()
     embed_vecs = elmo.embed_sentences(sentences)
-    doc_embed_dict[docid] = embed_vecs
+    doc_embed_vecs = []
+    for i in range(len(sentences)):
+        doc_embed_vecs.append(next(embed_vecs))
+    doc_embed_dict[docid] = doc_embed_vecs
+    # doc_embed_dict[docid] = embed_vecs
     # for docid in doclist_index_dict.keys():
     #     doc_embed_vecs = []
     #     for i in range(doclist_index_dict[docid][0], doclist_index_dict[docid][1]):
