@@ -1,7 +1,7 @@
 import argparse, json, spacy
 
 import numpy as np
-# from allennlp.commands.elmo import ElmoEmbedder
+from allennlp.commands.elmo import ElmoEmbedder
 from pathos.threading import ThreadPool
 
 def preprocess_para(paratext, nlp):
