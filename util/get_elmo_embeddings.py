@@ -21,14 +21,25 @@ def preprocessed_paratext(data_dict):
         preproc_doctext_dict[docid] = preprocess_para(data_dict[docid]['title']+'. '+data_dict[docid]['text'], nlp)
     return preproc_doctext_dict
 
-def get_elmo_embeddings(docid):
+def get_mean_elmo_embeddings(docid):
     sentences = preproc_doctext_dict[docid]
     elmo = ElmoEmbedder()
     embed_vecs = elmo.embed_sentences(sentences)
     doc_embed_vecs = []
     for i in range(len(sentences)):
         doc_embed_vecs.append(next(embed_vecs))
-    doc_embed_dict[docid] = doc_embed_vecs
+
+    cont_vec = doc_embed_vecs[0]
+    for i in range(1, len(doc_embed_vecs)):
+        cont_vec = np.hstack((cont_vec, doc_embed_vecs[i]))
+
+    concat_vec = cont_vec[0]
+    concat_vec = np.hstack((concat_vec, cont_vec[1]))
+    concat_vec = np.hstack((concat_vec, cont_vec[2]))
+
+    mean_vec = np.mean(concat_vec, axis=0)
+
+    doc_embed_dict[docid] = mean_vec
 
 parser = argparse.ArgumentParser(description="Generate ELMo embeddings for docs")
 parser.add_argument("-d", "--data_dict", required=True, help="Path to bbc data dict file")
@@ -43,9 +54,9 @@ with open(bbc_data_dict_file, 'r') as dd:
 preproc_doctext_dict = preprocessed_paratext(bbc_data_dict)
 doc_embed_dict = dict()
 print("Data loaded")
-doclist = list(preproc_doctext_dict.keys())[:10]
+doclist = list(preproc_doctext_dict.keys())
 
 with ThreadPool(nodes=thread_count) as pool:
-    pool.map(get_elmo_embeddings, doclist)
+    pool.map(get_mean_elmo_embeddings, doclist)
 
 np.save(outfile, doc_embed_dict)
