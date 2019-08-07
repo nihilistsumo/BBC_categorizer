@@ -22,15 +22,6 @@ def preprocessed_paratext(data_dict):
     return preproc_doctext_dict
 
 def get_elmo_embeddings(docid):
-    # doclist_index_dict = dict()
-    # start_index = 0
-    # for docid in doclist:
-    #     sent_count = len(preproc_doctext_dict[docid])
-    #     doclist_index_dict[docid] = (start_index, start_index + sent_count)
-    #     start_index += sent_count
-    # sentences = []
-    # for docid in doclist:
-    #     sentences = sentences + preproc_doctext_dict[docid]
     sentences = preproc_doctext_dict[docid]
     elmo = ElmoEmbedder()
     embed_vecs = elmo.embed_sentences(sentences)
@@ -38,13 +29,6 @@ def get_elmo_embeddings(docid):
     for i in range(len(sentences)):
         doc_embed_vecs.append(next(embed_vecs))
     doc_embed_dict[docid] = doc_embed_vecs
-    # doc_embed_dict[docid] = embed_vecs
-    # for docid in doclist_index_dict.keys():
-    #     doc_embed_vecs = []
-    #     for i in range(doclist_index_dict[docid][0], doclist_index_dict[docid][1]):
-    #         doc_embed_vecs.append(next(embed_vecs))
-    #     doc_embed_dict[docid] = doc_embed_vecs
-    # print("{} documents embedded".format(len(doclist)))
 
 parser = argparse.ArgumentParser(description="Generate ELMo embeddings for docs")
 parser.add_argument("-d", "--data_dict", required=True, help="Path to bbc data dict file")
@@ -59,7 +43,7 @@ with open(bbc_data_dict_file, 'r') as dd:
 preproc_doctext_dict = preprocessed_paratext(bbc_data_dict)
 doc_embed_dict = dict()
 print("Data loaded")
-doclist = list(preproc_doctext_dict.keys())
+doclist = list(preproc_doctext_dict.keys())[:10]
 
 with ThreadPool(nodes=thread_count) as pool:
     pool.map(get_elmo_embeddings, doclist)
